@@ -6,13 +6,21 @@ Created on Mon Jan  1 20:52:09 2018
 @author: cfzhou
 """
 
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jan  6 19:57:17 2018
+
+@author: cfzhou
+"""
+
 # importing libraries
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
 # import dataset
-dataset = pd.read_csv("Salary_Data.csv").iloc[:, :].values
+dataset = pd.read_csv("Position_Salaries.csv").iloc[:, :].values
 
 # missing data
 '''
@@ -33,15 +41,14 @@ dataset = onehotencoder.fit_transform(dataset).toarray()
 '''
 
 # spliting into training, CV, test sets
-dataset = pd.DataFrame(dataset)
-train, cv, test = np.split(dataset.sample(
-    frac=1), [int(.6 * len(dataset)), int(.8 * len(dataset))])
-X_train = train.iloc[:, :-1].values
-y_train = train.iloc[:, -1].values
-X_cv = cv.iloc[:, :-1].values
-y_cv = cv.iloc[:, -1].values
-X_test = test.iloc[:, :-1].values
-y_test = test.iloc[:, -1].values
+np.random.shuffle(dataset)
+train, cv, test = np.split(dataset, [int(.6 * len(dataset)), int(.8 * len(dataset))])
+X_train = train[:, :-1]
+y_train = train[:, -1]
+X_cv = cv[:, :-1]
+y_cv = cv[:, -1]
+X_test = test[:, :-1]
+y_test = test[:, -1]
 
 # feature scaling / mean normalization
 '''
