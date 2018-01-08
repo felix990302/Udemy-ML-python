@@ -21,16 +21,6 @@ np.random.shuffle(train)
 X_train = train[:, :-1]
 y_train = train[:, -1]
 
-
-# feature scaling / mean normalization
-'''
-from sklearn.preprocessing import StandardScaler
-sc_X = StandardScaler()
-X_train = sc_X.fit_transform(X_train)
-X_cv = sc_X.transform(X_cv)
-X_test = sc_X.transform(X_test)
-'''
-
 # fit decision tree regressor
 from sklearn.tree import DecisionTreeRegressor
 reg = DecisionTreeRegressor(criterion='friedman_mse', presort=True)

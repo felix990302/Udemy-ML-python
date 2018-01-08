@@ -21,16 +21,6 @@ np.random.shuffle(train)
 X_train = train[:, :-1]
 y_train = train[:, -1]
 
-
-# feature scaling / mean normalization
-'''
-from sklearn.preprocessing import StandardScaler
-sc_X = StandardScaler()
-X_train = sc_X.fit_transform(X_train)
-X_cv = sc_X.transform(X_cv)
-X_test = sc_X.transform(X_test)
-'''
-
 # fit random forest regressor
 from sklearn.ensemble import RandomForestRegressor
 reg = RandomForestRegressor(n_estimators=100, criterion='mse')
@@ -43,5 +33,5 @@ plt.scatter(X_train, y_train, color='red')
 plt.plot(X_grid,reg.predict(X_grid))
 plt.show()
 
-# predict new result with Support Vector regression
+# predict new result with random forest regression
 print(reg.predict(np.array([[6.5]])))
