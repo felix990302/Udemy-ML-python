@@ -56,6 +56,46 @@ from sklearn.ensemble import RandomForestRegressor
 reg = RandomForestRegressor(n_estimators=100, criterion='mse')
 reg.fit(X_train, y_train)
 
+# recursive feature elimination
+# from sklearn.model_selection import StratifiedKFold
+
+from sklearn.feature_selection import RFECV
+
+rfecv = RFECV(estimator=clas, 
+              step=1, 
+              cv=10,
+              scoring='f1_micro',
+              n_jobs=-1)
+rfecv.fit(X_train, y_train)
+
+# relev_feat = rfecv.support_
+relev_feat = rfecv.ranking_ == 1
+
+print("Optimal number of features : %d" % rfecv.n_features_)
+
+# Plot number of features VS. cross-validation scores
+plt.figure()
+plt.xlabel("Number of features selected")
+plt.ylabel("Cross validation score (nb of correct classifications)")
+plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
+plt.show()
+
+# limit features
+X_train = X_train[:,relev_feat]
+X_cv = X_cv[:,relev_feat]
+X_test = X_test[:,relev_feat]
+
+
+# add features
+'''
+from sklearn.preprocessing import PolynomialFeatures
+
+poly_feat = PolynomialFeatures(degree = 1)
+X_train = poly_feat.fit_transform(X_train)
+X_cv = poly_feat.fit_transform(X_cv)
+X_test = poly_feat.fit_transform(X_test)
+'''
+
 # Applying k-Fold Cross Validation
 from sklearn.model_selection import cross_val_score
 accuracies = cross_val_score(estimator=reg, X=X_train, y=y_train, cv=10)
@@ -83,7 +123,7 @@ plt.title("Learning Curve")
 plt.xlabel("Training examples")
 plt.ylabel("Score")
 train_sizes, train_scores, test_scores = learning_curve(
-        clas, X_train, y_train, cv=10, n_jobs=-1)
+        reg, X_train, y_train, cv=10, n_jobs=-1)
 train_scores_mean = np.mean(train_scores, axis=1)
 train_scores_std = np.std(train_scores, axis=1)
 test_scores_mean = np.mean(test_scores, axis=1)

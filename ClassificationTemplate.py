@@ -6,6 +6,23 @@ import pandas as pd
 # import dataset
 dataset = pd.read_csv("Social_Network_Ads.csv").iloc[:, 2:].values
 
+# missing data
+'''
+from sklearn.preprocessing import Imputer
+imputer = Imputer(missing_values="NaN", strategy="mean", axis=0)
+dataset[:, 1:3] = imputer.fit_transform(dataset[:, 1:3])
+'''
+
+# encode categorical data
+'''
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+labelencoder = LabelEncoder()
+dataset[:, 0] = labelencoder.fit_transform(dataset[:, 0])
+onehotencoder = OneHotEncoder(categorical_features=[0])
+dataset[:, 3] = labelencoder.fit_transform(dataset[:, 3])
+
+dataset = onehotencoder.fit_transform(dataset).toarray()
+'''
 
 # spliting into training, CV, test sets
 np.random.shuffle(dataset)
@@ -30,6 +47,46 @@ clas = LogisticRegression(penalty="l2",
                           multi_class='ovr',
                           )
 clas.fit(X_train,y_train)
+
+# recursive feature elimination
+# from sklearn.model_selection import StratifiedKFold
+
+from sklearn.feature_selection import RFECV
+
+rfecv = RFECV(estimator=clas, 
+              step=1, 
+              cv=10,
+              scoring='f1_micro',
+              n_jobs=-1)
+rfecv.fit(X_train, y_train)
+
+# relev_feat = rfecv.support_
+relev_feat = rfecv.ranking_ == 1
+
+print("Optimal number of features : %d" % rfecv.n_features_)
+
+# Plot number of features VS. cross-validation scores
+plt.figure()
+plt.xlabel("Number of features selected")
+plt.ylabel("Cross validation score (nb of correct classifications)")
+plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
+plt.show()
+
+# limit features
+X_train = X_train[:,relev_feat]
+X_cv = X_cv[:,relev_feat]
+X_test = X_test[:,relev_feat]
+
+
+# add features
+'''
+from sklearn.preprocessing import PolynomialFeatures
+
+poly_feat = PolynomialFeatures(degree = 1)
+X_train = poly_feat.fit_transform(X_train)
+X_cv = poly_feat.fit_transform(X_cv)
+X_test = poly_feat.fit_transform(X_test)
+'''
 
 # Predict test set results
 '''
@@ -77,8 +134,13 @@ plt.figure()
 plt.title("Learning Curve")
 plt.xlabel("Training examples")
 plt.ylabel("Score")
-train_sizes, train_scores, test_scores = learning_curve(
-        clas, X_train, y_train, cv=10, n_jobs=-1)
+train_sizes, train_scores, test_scores = learning_curve(clas,
+                                                        X_train, 
+                                                        y_train, 
+                                                        scoring='f1_micro',
+                                                        cv=10, 
+                                                        n_jobs=-1)
+
 train_scores_mean = np.mean(train_scores, axis=1)
 train_scores_std = np.std(train_scores, axis=1)
 test_scores_mean = np.mean(test_scores, axis=1)
@@ -118,6 +180,12 @@ plt.ylabel('Estimated Salary')
 plt.legend()
 plt.show()
 
+# predict test set
+y_pred = clas.predict(X_test)
 
+# scoring
+
+from sklearn import metrics
+final_score = metrics.f1_score(y_test, y_pred, average='micro')
 
 
