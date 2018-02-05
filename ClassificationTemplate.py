@@ -137,7 +137,7 @@ plt.ylabel("Score")
 train_sizes, train_scores, test_scores = learning_curve(clas,
                                                         X_train, 
                                                         y_train, 
-                                                        scoring='f1_micro',
+                                                        scoring='f1_micro',	
                                                         cv=10, 
                                                         n_jobs=-1)
 
